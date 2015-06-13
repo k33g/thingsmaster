@@ -1,2 +1,2 @@
 # thingsmaster
-Web application to manage connected object (with MQTT)
+Web application to manage connecteds object (with MQTT)
