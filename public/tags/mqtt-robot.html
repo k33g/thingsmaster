@@ -1,0 +1,91 @@
+<mqtt-robot>
+  <div class="container">
+
+    <div class="row">
+      <span class="card-title grey-text"><h5>ClientID: {opts.clientId}</h5></span>
+      <span class="card-title grey-text"><h6>ClientName: {opts.informations.name}</h6></span>
+      <h6>publication topic: {opts.informations.publishOn}</h6>
+    </div>
+
+    <div class="row">
+
+      <a class="waves-effect waves-light btn" onclick={btnLeft}>Left</a>
+      <a class="waves-effect waves-light btn" onclick={btnRight}>Right</a>
+      <a class="waves-effect waves-light btn" onclick={btnForward}>Forward</a>
+      <a class="waves-effect waves-light btn" onclick={btnBackward}>Backward</a>
+      <a class="waves-effect waves-light btn" onclick={btnStop}>Stop</a>
+
+    </div>
+
+  </div>
+
+  <script>
+    var broker = this.opts.broker.observe(this);
+
+    this.on("mount", function() {});
+
+    // message from the broker
+    this.on("click:line:"+this.opts.clientId, function(data) {
+
+      if($(this.graph).find("svg").size() == 0) {
+        console.log("=== create chart ===");
+        myChart = $(this.graph).epoch({ type: 'time.line', axes: ['right', 'bottom'], data: myData });
+      }
+    }.bind(this))
+
+    this.on("mqtt-data", function(data) {
+      if((data.topic.trim() == this.opts.informations.publishOn.trim()) && this.opts.clientId == data.clientId) {
+        // foo
+      }
+    }.bind(this));
+
+    this.btnSendMessage = function() {
+      broker.emit("to-mqtt-broker", {
+        topic: "Hello",
+        message: {
+          text: "ping!", clientId: this.opts.clientId, clientName: this.opts.informations.name
+        }
+      });
+    }
+
+    this.btnRight = function() {
+      broker.emit("to-mqtt-broker", {
+        topic: "bobby/right",
+        message: {}
+      });
+    }
+    this.btnLeft = function() {
+      broker.emit("to-mqtt-broker", {
+        topic: "bobby/left",
+        message: {}
+      });
+    }
+    this.btnForward = function() {
+      broker.emit("to-mqtt-broker", {
+        topic: "bobby/forward",
+        message: {}
+      });
+    }
+    this.btnBackward = function() {
+      broker.emit("to-mqtt-broker", {
+        topic: "bobby/backward",
+        message: {}
+      });
+    }
+    this.btnStop = function() {
+      broker.emit("to-mqtt-broker", {
+        topic: "bobby/stop",
+        message: {}
+      });
+    }
+
+    this.on("unmount:"+this.opts.clientId, function() {
+      this.unmount()
+    })
+
+    this.on("unmount", function() {
+      console.log("unmount:"+this.opts.clientId)
+    })
+
+  </script>
+</mqtt-robot>

@@ -1,0 +1,74 @@
+<http-things-grid>
+  <!-- http-things-grid -->
+  <ul name="thingsList" class="collapsible" data-collapsible="accordion">
+  </ul>
+
+  <script>
+    var broker = this.opts.broker.observe(this);
+
+    var displayedThingsCollection = new this.opts.Things();
+    var thingsCollection = new this.opts.Things();
+    var thingsList = $(this.thingsList);
+
+    var icons = {
+      text      : "mdi-maps-place",
+      sphero    : "mdi-av-album",
+      grovenest : "mdi-hardware-cast",
+      robot     : "mdi-action-android"
+    };
+
+    this.on("unsubscribed", function(data) { // message from socket
+      var id = data.clientId;
+      displayedThingsCollection.remove(displayedThingsCollection.get(id));
+      broker.emit("unmount:"+id);
+      $("#"+id).remove();
+    });
+
+    this.on("mount", function() {
+
+      setInterval(function(){
+        thingsCollection.fetch().then(function() {
+          var difference = _.difference(thingsCollection.models, displayedThingsCollection.models);
+
+          if (difference.length > 0) {
+
+            difference.forEach(function(thing) {
+              // ad li to ul
+              thingsList.append(
+                  '<li id="'+thing.get("id")+'" name="'+thing.get("id")+'">'+
+                  '<div class="collapsible-header"><i class="'+icons[thing.get("informations").kind]+'"></i>' +
+                  thing.get("id") + ": " + thing.get("informations").name + '</div>'+
+                  '<div id="thing_'+thing.get("id")+'" class="collapsible-body">'+
+                  '</div>'+
+                  "</li>"
+              );
+
+              // detect if clicked (to create graph when open line)
+              $(this[thing.get("id")]).click(function(el) {
+                var idOfLine = el.currentTarget.attributes["id"].value
+                broker.emit("click:line:"+idOfLine, "click")
+              })
+
+              // mount nested component in the li
+              riot.mountTo("#thing_"+thing.get("id"), "mqtt-"+thing.get("informations").kind,{
+                clientId: thing.get("id"),
+                informations: thing.get("informations"),
+                broker: broker
+              });
+            });
+
+            thingsList.collapsible({
+              accordion : false
+            });
+
+            displayedThingsCollection.add(difference);
+            console.log(displayedThingsCollection);
+          }
+
+        }.bind(this))
+      }.bind(this), this.opts.delay);
+
+    }.bind(this));
+
+  </script>
+</http-things-grid>

@@ -1,0 +1,52 @@
+<mqtt-socket-io>
+  <!-- mqtt-socket-io -->
+  <span>Socket: {message}</span>
+  <script>
+    var broker = this.opts.broker.observe(this), socket ;
+
+    this.on("mount", function() {
+      if(this.opts.host=="auto") { this.opts.host = window.location.host.split(':')[0]; }
+      var url = this.opts.protocol + "://" + this.opts.host + ":" +this.opts.port;
+
+      socket = io.connect(url);
+
+      socket.on('connect', function () {
+        this.message = "socket.io ready on " + url;
+        this.update();
+
+        // when things publish data on topic(s)
+        socket.on("mqtt", function (data) {
+          broker.emit("mqtt-data", data);
+        });
+
+        socket.on('clientConnected', function (data) {
+          broker.emit("client-connected", data);
+          console.log('clientConnected', {clientConnected: data});
+        });
+
+        socket.on('subscribed', function (data) {
+          broker.emit("subscribed", data);
+          console.log('subscribed', {subscribed: data});
+        });
+
+        socket.on('unsubscribed', function (data) {
+          broker.emit("unsubscribed", data);
+          console.log('unsubscribed', {unsubscribed: data});
+        });
+
+        socket.on('clientDisconnected', function (data) {
+          broker.emit("client-disconnected", data);
+          console.log('clientDisconnected', {clientDisconnected: data});
+        });
+
+      }.bind(this));
+
+    }.bind(this));
+
+    this.on("to-mqtt-broker", function(data) {
+      console.log("to-mqtt-broker", data);
+      socket.emit("to-mqtt-broker", JSON.stringify(data));
+    })
+
+  </script>
+</mqtt-socket-io>

@@ -1,0 +1,11 @@
+{
+  "name": "ThingsMaster",
+  "description": "Web application to manage connected objects",
+  "author": "@k33g_org",
+  "license": "MIT",
+  "dependencies": {
+    "colors": "^1.1.0",
+    "cylon": "^1.0.0",
+    "cylon-mqtt": "^0.5.0"
+  }
+}

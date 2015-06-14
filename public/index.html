@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>ThingsMaster</title>
+  <link rel="stylesheet" type="text/css" href="bower_components/materialize/dist/css/materialize.min.css" media="screen,projection">
+  <link rel="stylesheet" type="text/css" href="bower_components/epoch/epoch.min.css">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+  <script src="tags/mqtt-socket-io.html" type="riot/tag"></script>
+  <script src="tags/http-things-grid.html" type="riot/tag"></script>
+
+  <script src="tags/mqtt-text.html" type="riot/tag"></script>
+  <script src="tags/mqtt-sphero.html" type="riot/tag"></script>
+  <script src="tags/mqtt-grovenest.html" type="riot/tag"></script>
+  <script src="tags/mqtt-robot.html" type="riot/tag"></script>
+
+
+</head>
+<body>
+  <div class="navbar-fixed">
+    <nav>
+      <div class="nav-wrapper purple darken-4">
+        <a href="#!" class="brand-logo center">Things</a>
+        <ul class="right hide-on-med-and-down">
+          <li></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+
+  <mqtt-socket-io
+      protocol="http"
+      host="auto"
+      port=5000>
+  </mqtt-socket-io>
+
+  <http-things-grid
+      componentsPathConfig="components.json"
+      delay=2000 status="connected">
+  </http-things-grid>
+
+
+  <script src="bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="bower_components/underscore/underscore-min.js"></script>
+  <script src="bower_components/backbone/backbone.js"></script>
+  <script src="bower_components/d3/d3.min.js"></script>
+  <script src="bower_components/epoch/epoch.min.js"></script>
+  <script src="bower_components/socket.io-client/socket.io.js"></script>
+  <script src="bower_components/materialize/dist/js/materialize.min.js"></script>
+  <script src="bower_components/riot/riot+compiler.min.js"></script>
+
+  <script src="js/core.js"></script>
+  <script src="js/things.js"></script>
+  <script src="js/index.js"></script>
+
+</body>
+</html>

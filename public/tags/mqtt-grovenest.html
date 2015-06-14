@@ -1,0 +1,102 @@
+<mqtt-grovenest>
+  <div class="container">
+
+    <div class="row">
+      <span class="card-title grey-text"><h5>ClientID: {opts.clientId}</h5></span>
+      <span class="card-title grey-text"><h6>ClientName: {opts.informations.name}</h6></span>
+      <h6>publication topic: {opts.informations.publishOn}</h6>
+      <h6>{dataTime}</h6>
+      <h4>{dataValue}</h4>
+    </div>
+
+    <div class="row">
+      <div
+          id="graph"
+          name="graph"
+          class="epoch category10"
+          style="width: 100%; height: 200px">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="input-field col s6">
+        <a class="waves-effect waves-light btn">Distance: {distance} cm</a>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="input-field col s4">
+        <i class="mdi-action-autorenew prefix"></i>
+        <input name="inputConsigne" placeholder="Consigne" type="text" class="validate">
+      </div>
+      <div class="input-field col s4">
+        <a class="waves-effect waves-light btn" onclick={sendConsigne}>Consigne</a>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    var broker = this.opts.broker.observe(this), myData, myChart, informations;
+
+    this.inputConsigne.value = 10;
+
+    this.on("mount", function() {
+      myData = [
+        { label: 'T', values: [{time: 0, y: 0}] },
+        { label: 'H', values: [{time: 0, y: 0}] }
+      ];
+
+    }.bind(this));
+
+    // message from the broker
+    this.on("click:line:"+this.opts.clientId, function(data) {
+      if($(this.graph).find("svg").size() == 0) { // if graph has not been initialized
+        console.log("=== create chart ===");
+        myChart = $(this.graph).epoch({ type: 'time.line', axes: ['right', 'bottom'], data: myData });
+      }
+    }.bind(this))
+
+    // message from the broker
+    this.on("mqtt-data", function(data) {
+      if((data.topic.trim() == this.opts.informations.publishOn.trim()) && this.opts.clientId == data.clientId) {
+
+        var message = JSON.parse(data.message.replace(/\0/g,""));
+        message.time = Date.now();
+        informations = JSON.parse(data.message);
+
+        if(myChart) {
+          myChart.push([
+            {time:message.time, y: message.temperature},
+            {time:message.time, y: message.humidity}
+          ]);
+          this.distance = message.distance;
+          this.update()
+        }
+      }
+    }.bind(this));
+
+    this.on("unmount:"+this.opts.clientId, function() {
+      this.unmount()
+    });
+
+    this.on("unmount", function() {
+      console.log("unmount:"+this.opts.clientId)
+    });
+
+    this.sendConsigne = function() {
+
+      broker.emit("to-mqtt-broker", {
+        topic: "hello/grove/nest",
+        message: {
+            value: this.inputConsigne.value
+          , clientId: this.opts.clientId
+          , clientName: this.opts.informations.name
+        }
+      });
+
+    }
+
+  </script>
+</mqtt-grovenest>

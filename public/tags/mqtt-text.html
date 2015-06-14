@@ -1,0 +1,47 @@
+<mqtt-text>
+  <div class="container">
+
+    <div class="row">
+      <span class="card-title grey-text"><h5>ClientID: {opts.clientId}</h5></span>
+      <span class="card-title grey-text"><h6>ClientName: {opts.informations.name}</h6></span>
+      <h6>publication topic: {opts.informations.publishOn}</h6>
+      <h6>{dataTime}</h6>
+      <h4>{dataValue}</h4>
+      <a class="waves-effect waves-light btn" onclick={btnSendMessage}>Send Message to server</a>
+    </div>
+
+  </div>
+
+  <script>
+    var broker = this.opts.broker.observe(this);
+
+    this.on("mount", function() {});
+
+    this.on("mqtt-data", function(data) {
+      if((data.topic.trim() == this.opts.informations.publishOn.trim()) && this.opts.clientId == data.clientId) {
+        var thingData = JSON.parse(data.message);
+        this.dataTime = new Date(thingData.time);
+        this.dataValue = thingData.value;
+        this.update()
+      }
+    }.bind(this));
+
+    this.btnSendMessage = function() {
+      broker.emit("to-mqtt-broker", {
+        topic: "Hello",
+        message: {
+          text: "ping!", clientId: this.opts.clientId, clientName: this.opts.informations.name
+        }
+      });
+    }
+
+    this.on("unmount:"+this.opts.clientId, function() {
+      this.unmount()
+    })
+
+    this.on("unmount", function() {
+      console.log("unmount:"+this.opts.clientId)
+    })
+
+  </script>
+</mqtt-text>
